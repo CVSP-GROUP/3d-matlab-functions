@@ -7,7 +7,8 @@ function principalNormal = getPrincipalNormal( depth, camera_info, ax )
 %
 % Inputs:
 %  depth: depth image H x W (values in mm)
-%  camera_info: struct with fields fx, fy, cx, cy (camera intrisic parameters)
+%  camera_info: array with values [fx, fy, cx, cy] (camera intrisic parameters)
+%               also can be struct with fields fx, fy, cx, cy
 %  ax: which axis should be positive or negative. 1,2,3 for x,y,z positive re-
 %      spectively, -1,-2,-3 for x,y,z negative respectively. Default = -2
 %
@@ -21,8 +22,17 @@ if ~ismember(ax, [-3,-2,-1,1,2,3])
     error('Error. Argument ax must be one of: -3,-2,-1,1,2,3')
 end
 
+addpath('util')
 addpath('util/GridSphere/')
 
+if ~isstruct(camera_info)
+    old_cinfo = camera_info;
+    camera_info = struct
+    camera_info.fx = old_cinfo(1);
+    camera_info.fy = old_cinfo(2);
+    camera_info.cx = old_cinfo(3);
+    camera_info.cy = old_cinfo(4);
+end
 pcl = depthToCloud(depth, camera_info);
 [N, ~] = computeNormalsSquareSupport(pcl, [], 3, ones(size(depth)));
 N = reshape(N, [], 3);
